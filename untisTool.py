@@ -6,7 +6,7 @@ import logging
 
 
 def main():
-	logging.basicConfig(filename="",level=logging.DEBUG)
+	logging.basicConfig(filename="untisTool.log",level=logging.DEBUG)
 	logger = logging.getLogger("untisTool")
 	config = loadConfig()
 	if "untis" in config.sections():
@@ -92,7 +92,7 @@ def buildIcal(untisEvent):
 
 
 class Untis():
-	__useragent__ = "Test Useragent"
+	__useragent__ = "UntisTool"
 
 	def __init__(self, url, school, username, password):
 		self.__logger__ = logging.getLogger("untisTool")
@@ -156,69 +156,70 @@ class Untis():
 		return week
 
 
-
-def getUntisData(untisUrl, school, untisUsername, untisPassword, startDate="this week monday", endDate="this week friday"):
-	logger = logging.getLogger("untisTool")
-	session = webuntis.Session(
-			server = untisUrl,
-			username = untisUsername,
-			password = untisPassword,
-			school = school,
-			useragent = "Test"
-	)
-
-	session.login()
-
-	my_class = session.klassen().filter(name="EI1c")[0]
-
-	if isinstance(startDate, type(str())) or isinstance(endDate, type(str())):
-		logger.warning("No date supplied for getUntisData(). Using monday of this week as start and friday of this week as end.")
-		today = datetime.date.today()
-		monday = today - datetime.timedelta(days=today.weekday())
-		friday = monday + datetime.timedelta(days=4)
-		startDate = monday
-		endDate = friday
-
-	# get data from untis
-	tt = session.timetable(klasse=my_class, start=startDate, end=endDate)
-
-	week = {
-			"monday" : (),
-			"tuesday" : (),
-			"wednesday" : (),
-			"thursday" : (),
-			"friday" : ()
-	}
-
-	for course in tt:
-		i = course
-		name = ",".join(map(lambda e: e.name, i.subjects))
-		long_name = ",".join(map(lambda e: e.long_name, i.subjects))
-		klassen = ",".join(map(lambda e: e.name, i.klassen))
-		rooms = ",".join(map(lambda e: e.name, i.rooms))
-		start = i.start
-		stop = i.end
-		day = ({
-				"index" : len(week[start.strftime("%A").lower()]),
-				"id" : str(i.id),
-				"name" : name,
-				"long_name" : long_name,
-				"klassen" : klassen,
-				"rooms" : rooms,
-				"start" : start,
-				"end" : stop
-				},)
-		week[start.strftime("%A").lower()] += day
-
-	# sort course in all weekdays by starttime
-	for day in week.keys():
-		week[day] = sorted(week[day], key=lambda k: k["start"])
-
-	# !import code; code.interact(local=vars())
-
-		# {'active': True, 'did': 6, 'name': 'EI1c', 'longName': 'Bachelor EI1c', 'id': 4872}
-	session.logout()
-	return week
+# OLD FUNCTION. Now splitted and contained in "Untis"-Class
+#
+#def getUntisData(untisUrl, school, untisUsername, untisPassword, startDate="this week monday", endDate="this week friday"):
+#	logger = logging.getLogger("untisTool")
+#	session = webuntis.Session(
+#			server = untisUrl,
+#			username = untisUsername,
+#			password = untisPassword,
+#			school = school,
+#			useragent = "Test"
+#	)
+#
+#	session.login()
+#
+#	my_class = session.klassen().filter(name="EI1c")[0]
+#
+#	if isinstance(startDate, type(str())) or isinstance(endDate, type(str())):
+#		logger.warning("No date supplied for getUntisData(). Using monday of this week as start and friday of this week as end.")
+#		today = datetime.date.today()
+#		monday = today - datetime.timedelta(days=today.weekday())
+#		friday = monday + datetime.timedelta(days=4)
+#		startDate = monday
+#		endDate = friday
+#
+#	# get data from untis
+#	tt = session.timetable(klasse=my_class, start=startDate, end=endDate)
+#
+#	week = {
+#			"monday" : (),
+#			"tuesday" : (),
+#			"wednesday" : (),
+#			"thursday" : (),
+#			"friday" : ()
+#	}
+#
+#	for course in tt:
+#		i = course
+#		name = ",".join(map(lambda e: e.name, i.subjects))
+#		long_name = ",".join(map(lambda e: e.long_name, i.subjects))
+#		klassen = ",".join(map(lambda e: e.name, i.klassen))
+#		rooms = ",".join(map(lambda e: e.name, i.rooms))
+#		start = i.start
+#		stop = i.end
+#		day = ({
+#				"index" : len(week[start.strftime("%A").lower()]),
+#				"id" : str(i.id),
+#				"name" : name,
+#				"long_name" : long_name,
+#				"klassen" : klassen,
+#				"rooms" : rooms,
+#				"start" : start,
+#				"end" : stop
+#				},)
+#		week[start.strftime("%A").lower()] += day
+#
+#	# sort course in all weekdays by starttime
+#	for day in week.keys():
+#		week[day] = sorted(week[day], key=lambda k: k["start"])
+#
+#	# !import code; code.interact(local=vars())
+#
+#		# {'active': True, 'did': 6, 'name': 'EI1c', 'longName': 'Bachelor EI1c', 'id': 4872}
+#	session.logout()
+#	return week
 
 
 main()
